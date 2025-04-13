@@ -1,0 +1,60 @@
+#!/bin/bash
+
+TYPE=""
+NAME=""
+SCRIPT_DIR="$(dirname "$(realpath "$0")")"
+
+if [ "$1" != "create" ]; then
+  echo "❌ Unknown command: $1"
+  echo "Usage: $0 create -t <type> -n <name>"
+  exit 1
+fi
+
+shift
+
+while getopts "t:n:" opt; do
+  case "$opt" in
+    t)
+      TYPE="$OPTARG"
+      ;;
+    n)
+      NAME="$OPTARG"
+      ;;
+    *)
+      echo "Usage: $0 create -t <type> -n <name>"
+      exit 1
+      ;;
+  esac
+done
+
+if [ -z "$TYPE" ] || [ -z "$NAME" ]; then
+  echo "❌ Missing required arguments!"
+  echo "Usage: $0 create -t <type> -n <name>"
+  exit 1
+fi
+
+echo "✅ Creating project '$NAME' of type '$TYPE'..."
+
+case "$TYPE" in
+  react)
+    npm create vite@latest "$NAME" -- --template react
+    cd "$NAME" && npm install
+    ;;
+  react-native)
+    npm install -g expo-cli
+    expo init "$NAME" --template blank
+    ;;
+  cpp)
+    cp -r "$SCRIPT_DIR/templates/cpp/" "$NAME"
+    ;;
+  html)
+    cp -r "$SCRIPT_DIR/templates/html/" "$NAME"
+    ;;
+  python)
+    cp -r "$SCRIPT_DIR/templates/python/" "$NAME"
+    ;;
+  *)
+    echo "❌ Unknown project type: $TYPE"
+    exit 1
+    ;;
+esac
